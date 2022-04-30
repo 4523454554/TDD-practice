@@ -3,7 +3,6 @@ package com.jay.base.membership;
 import com.jay.base.membership.domain.Membership;
 import com.jay.base.membership.domain.MembershipName;
 import com.jay.base.membership.domain.MembershipRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MembershipRepositoryTest {
 
     @Autowired
-    private MembershipRepository memberShipRepository;
+    private MembershipRepository membershipRepository;
 
     @Test
     public void 멤버십이등록된다() {
@@ -28,7 +27,7 @@ public class MembershipRepositoryTest {
                 .build();
 
         //when
-        final Membership result = memberShipRepository.save(membership);
+        final Membership result = membershipRepository.save(membership);
 
         //then
         assertThat(result.getId()).isNotNull();
@@ -47,8 +46,8 @@ public class MembershipRepositoryTest {
                 .build();
 
         //when
-        memberShipRepository.save(membership);
-        final Membership result = memberShipRepository.findByUserIdAndMembershipName("userId", MembershipName.NAVER);
+        membershipRepository.save(membership);
+        final Membership result = membershipRepository.findByUserIdAndMembershipName("userId", MembershipName.NAVER);
 
         //then
         assertThat(result.getId()).isNotNull();
@@ -62,7 +61,7 @@ public class MembershipRepositoryTest {
         //given
 
         //when
-        List<Membership> result = memberShipRepository.findAllByUserId("userId");
+        List<Membership> result = membershipRepository.findAllByUserId("userId");
 
         //then
         assertThat(result.size()).isEqualTo(0);
@@ -71,23 +70,40 @@ public class MembershipRepositoryTest {
     @Test
     public void 멤버십_조회_사이즈2() {
         //given
-        memberShipRepository.save(Membership.builder()
+        membershipRepository.save(Membership.builder()
                 .userId("userId")
                 .membershipName(MembershipName.NAVER)
                 .point(10000)
                 .build());
 
-        memberShipRepository.save(Membership.builder()
+        membershipRepository.save(Membership.builder()
                 .userId("userId")
                 .membershipName(MembershipName.KAKAO)
                 .point(10000)
                 .build());
 
         //when
-        List<Membership> result = memberShipRepository.findAllByUserId("userId");
+        List<Membership> result = membershipRepository.findAllByUserId("userId");
 
         //then
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void 멤버십_추가후_삭제() {
+        //given
+        final Membership membership = Membership.builder()
+                .userId("userId")
+                .membershipName(MembershipName.NAVER)
+                .point(10000)
+                .build();
+
+        final Membership savedMembership = membershipRepository.save(membership);
+
+        //when
+        membershipRepository.deleteById(membership.getId());
+
+        //then
     }
 
 }

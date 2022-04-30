@@ -7,6 +7,7 @@ import com.jay.base.membership.dto.MembershipDetailResponse;
 import com.jay.base.membership.dto.MembershipResponse;
 import com.jay.base.membership.exception.MembershipErrorResult;
 import com.jay.base.membership.exception.MembershipException;
+import com.jay.base.point.PointCalculateService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,15 +31,17 @@ public class MembershipServiceTest {
 
     @Mock
     private MembershipRepository membershipRepository;
+    @Mock
+    private PointCalculateService pointCalculateService;
 
-    private final Long membershipId = 0L;
+    private final Long membershipId = 1L;
     private final String userId = "userId";
     private final MembershipName membershipName = MembershipName.NAVER;
     private final Integer point = 10000;
 
     private Membership membership() {
         return Membership.builder()
-                .id(-1L)
+                .id(1L)
                 .userId(userId)
                 .membershipName(MembershipName.NAVER)
                 .point(point)
@@ -126,6 +129,82 @@ public class MembershipServiceTest {
         //then
         assertThat(result.getMembershipName()).isEqualTo(membershipName);
         assertThat(result.getPoint()).isEqualTo(point);
+    }
+
+    @Test
+    public void 멤버십삭제실패_존재하지않음() {
+        //given
+        doReturn(Optional.empty()).when(membershipRepository).findById(membershipId);
+
+        //when
+        final MembershipException result = assertThrows(MembershipException.class, ()-> target.removeMembership(membershipId, userId));
+
+        //then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+    }
+
+    @Test
+    public void 멤버십삭제실패_본인이아님() {
+        //given
+        final Membership membership = membership();
+        doReturn(Optional.of(membership)).when(membershipRepository).findById(membershipId);
+
+        //when
+        final MembershipException result = assertThrows(MembershipException.class, ()-> target.removeMembership(membershipId, "notOwner"));
+
+        //then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+    }
+
+    @Test
+    public void 멤버십삭제성공() {
+        //given
+        final Membership membership = membership();
+        doReturn(Optional.of(membership)).when(membershipRepository).findById(membershipId);
+
+        //when
+        target.removeMembership(membershipId, userId);
+
+        //then
+    }
+
+    @Test
+    public void 멤버십적립실패_존재하지않음() {
+        //given
+        doReturn(Optional.empty()).when(membershipRepository).findById(membershipId);
+
+        //when
+        final MembershipException result = assertThrows(MembershipException.class, () -> target.accumulateMembershipPoint(membershipId, userId, 10000));
+
+        //then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+    }
+
+    @Test
+    public void 멤버십적립실패_본인이아님() {
+        //given
+        final Membership membership = membership();
+        doReturn(Optional.of(membership)).when(membershipRepository).findById(membershipId);
+
+        //when
+        final MembershipException result = assertThrows(MembershipException.class, () -> target.accumulateMembershipPoint(membershipId, "notOwner", 10000));
+
+        //then
+        assertThat(result.getErrorResult()).isEqualTo(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+
+    }
+
+    @Test
+    public void 멤버십적립성공() {
+        //given
+        final Membership membership = membership();
+        doReturn(Optional.of(membership)).when(membershipRepository).findById(membershipId);
+
+        //when
+        target.accumulateMembershipPoint(membershipId, userId, 10000);
+
+        //then
+
     }
 
 

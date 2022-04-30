@@ -1,6 +1,7 @@
 package com.jay.base.membership;
 
 import com.jay.base.membership.dto.MembershipDetailResponse;
+import com.jay.base.membership.dto.MembershipPointRequest;
 import com.jay.base.membership.dto.MembershipRequest;
 import com.jay.base.membership.dto.MembershipResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,16 +34,39 @@ public class MembershipController {
 
     @GetMapping("/api/v1/memberships")
     public ResponseEntity<List<MembershipDetailResponse>> getMemberList(
-            @RequestHeader(USER_ID_HEADER) final String userId) {
+            @RequestHeader(USER_ID_HEADER) @Valid final String userId) {
         return ResponseEntity.ok(membershipService.getMembershipList(userId));
     }
 
     @GetMapping("/api/v1/memberships/{id}")
     public ResponseEntity<MembershipDetailResponse> getMembership(
             @PathVariable Long id,
-            @RequestHeader(USER_ID_HEADER) final String userId) {
+            @RequestHeader(USER_ID_HEADER) @Valid final String userId) {
 
         return ResponseEntity.ok(membershipService.getMembership(id, userId));
     }
+
+    @DeleteMapping("/api/v1/memberships/{id}")
+    public ResponseEntity<Void> removerMembership(
+            @RequestHeader(USER_ID_HEADER) final String userId,
+            @PathVariable final Long id) {
+
+        membershipService.removeMembership(id, userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/api/v1/memberships/{id}/accumulate")
+    public ResponseEntity<Void> accumulateMembershipPoint(
+            @RequestHeader(USER_ID_HEADER) final String userId,
+            @PathVariable final Long id,
+            @RequestBody @Valid final MembershipPointRequest membershipPointRequest) {
+
+        membershipService.accumulateMembershipPoint(id, userId, membershipPointRequest.getPoint());
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 }

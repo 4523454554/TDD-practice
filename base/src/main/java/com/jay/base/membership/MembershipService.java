@@ -7,8 +7,10 @@ import com.jay.base.membership.dto.MembershipDetailResponse;
 import com.jay.base.membership.dto.MembershipResponse;
 import com.jay.base.membership.exception.MembershipErrorResult;
 import com.jay.base.membership.exception.MembershipException;
+import com.jay.base.point.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MembershipService {
 
+    private final PointService pointService;
     private final MembershipRepository membershipRepository;
 
     public MembershipResponse addMembership(final String userId, final MembershipName membershipName, final Integer point) {
@@ -58,6 +61,10 @@ public class MembershipService {
         final Optional<Membership> optionalMembership = membershipRepository.findById(membershipId);
         final Membership membership = optionalMembership.orElseThrow(()-> new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND));
 
+        if (membershipId < 1) {
+            throw new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+        }
+
         if (!membership.getUserId().equals(userId)) {
             throw new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
         }
@@ -68,5 +75,33 @@ public class MembershipService {
                 .point(membership.getPoint())
                 .createdAt(membership.getCreatedAt())
                 .build();
+    }
+
+    public void removeMembership(final Long membershipId, final String userId) {
+
+       final Optional<Membership> optionalMembership = membershipRepository.findById(membershipId);
+       final Membership membership = optionalMembership.orElseThrow(()-> new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND));
+
+       if (!membership.getUserId().equals(userId)) {
+           throw new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+       }
+
+       membershipRepository.deleteById(membershipId);
+
+    }
+
+    @Transactional
+    public void accumulateMembershipPoint(final Long membershipId, final String userId, final int price) {
+        final Optional<Membership> optionalMembership = membershipRepository.findById(membershipId);
+        final Membership membership = optionalMembership.orElseThrow(
+                ()-> new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND));
+
+        if (!membership.getUserId().equals(userId)) {
+            throw new MembershipException(MembershipErrorResult.MEMBERSHIP_NOT_FOUND);
+        }
+
+        final int willBeAddedPoint = pointService.getPoint(price);
+
+        membership.setPoint(membership.getPoint() + willBeAddedPoint);
     }
 }
