@@ -1,13 +1,17 @@
 package com.jay.base.membership;
 
+import com.jay.base.membership.domain.Membership;
+import com.jay.base.membership.domain.MembershipName;
+import com.jay.base.membership.domain.MembershipRepository;
+import com.jay.base.membership.dto.MembershipResponse;
 import com.jay.base.membership.exception.MembershipErrorResult;
 import com.jay.base.membership.exception.MembershipException;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,7 +59,7 @@ public class MembershipServiceTest {
         doReturn(membership()).when(membershipRepository).save(any(Membership.class));
 
         //when
-        final Membership result = target.addMembership(userId, MembershipName.NAVER, point);
+        final MembershipResponse result = target.addMembership(userId, MembershipName.NAVER, point);
         //then
         assertThat(result.getId()).isNotNull();
         assertThat(result.getMembershipName()).isEqualTo(MembershipName.NAVER);

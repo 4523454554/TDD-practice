@@ -1,5 +1,8 @@
 package com.jay.base.membership;
 
+import com.jay.base.membership.domain.Membership;
+import com.jay.base.membership.domain.MembershipName;
+import com.jay.base.membership.domain.MembershipRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

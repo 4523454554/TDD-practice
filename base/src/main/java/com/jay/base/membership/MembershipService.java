@@ -1,5 +1,9 @@
 package com.jay.base.membership;
 
+import com.jay.base.membership.domain.Membership;
+import com.jay.base.membership.domain.MembershipName;
+import com.jay.base.membership.domain.MembershipRepository;
+import com.jay.base.membership.dto.MembershipResponse;
 import com.jay.base.membership.exception.MembershipErrorResult;
 import com.jay.base.membership.exception.MembershipException;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +15,7 @@ public class MembershipService {
 
     private final MembershipRepository membershipRepository;
 
-    public Membership addMembership(final String userId, final MembershipName membershipName, final Integer point) {
+    public MembershipResponse addMembership(final String userId, final MembershipName membershipName, final Integer point) {
         Membership result = membershipRepository.findByUserIdAndMembershipName(userId, membershipName);
         if (result != null) {
             throw new MembershipException(MembershipErrorResult.DUPLICATED_MEMBERSHIP_REGISTER);
@@ -23,6 +27,11 @@ public class MembershipService {
                 .point(point)
                 .build();
 
-        return membershipRepository.save(membership);
+        Membership savedMembership = membershipRepository.save(membership);
+
+        return MembershipResponse.builder()
+                .id(savedMembership.getId())
+                .membershipName(savedMembership.getMembershipName())
+                .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.jay.base.membership;
+package com.jay.base.membership.domain;
 
 public enum MembershipName {
     NAVER, KAKAO, LINE

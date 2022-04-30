@@ -1,4 +1,4 @@
-package com.jay.base.membership;
+package com.jay.base.membership.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
